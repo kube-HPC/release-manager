@@ -5,11 +5,14 @@ name: CI-MAIN
 # Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [master]
   repository_dispatch: 
       types: [trigger]
   workflow_dispatch:
+    inputs:
+      BRANCH:
+        description: Hkube branch to clone (e.g. master, release_v1_3)
+        required: true
+        default: master
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -27,7 +30,7 @@ jobs:
       - run: npm ci
       - run: ./scripts/version.sh
         env:
-          REQUIRED_VERSION: '${{ github.event.client_payload.REQUIRED_VERSION }}'
+          BRANCH: '${{ github.event.client_payload.BRANCH || github.event.inputs.BRANCH }}'
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
       - name: trigger
         id: trigger

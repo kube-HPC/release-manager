@@ -36,23 +36,10 @@ const getCoreVersions = async () => {
 };
 
 const paginationHelper = (github, method, options) => {
-
     return github.paginate(method.endpoint.merge(options))
-
-
-    // let response = await method({ ...options, per_page: 200 });
-    // let { data } = response;
-    // while (github.hasNextPage(response)) {
-    //     response = await github.getNextPage(response, { 'user-agent': HKUBE });
-    //     data = data.concat(response.data);
-    // }
-    // return data;
-
 }
 
 const getRestVersions = async (github) => {
-
-
     const reposRaw = await paginationHelper(github, github.repos.listForOrg, {
         org: 'Kube-HPC'
     });
@@ -90,9 +77,7 @@ const getRestVersions = async (github) => {
 }
 
 const uploadFile = async (github,release,file,label)=>{
-
     const content = await readFile(file);
-
     const uploadRes = await github.repos.uploadReleaseAsset({
         url: release.data.upload_url,
         headers:{
@@ -130,8 +115,6 @@ const createRelease = async (github) => {
             repo: RELEASE_MANAGER_REPO,
             tag_name: tagName,
             name: tagName,
-            // body: JSON.stringify(output, null, 2),
-            // prerelease: true
         })
         await uploadFile(github,tagRefResponse,'./version.json','Version Description')
         await uploadFile(github,tagRefResponse,'./version.yaml','Version Description yaml')
