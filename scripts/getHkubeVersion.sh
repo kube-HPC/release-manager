@@ -36,7 +36,9 @@ echo downloading version $VERSION, app_version: $APP_VERSION
 DIR=${BASE_DIR}/hkube-${VERSION}
 mkdir -p ${DIR}
 cd ${DIR}
-helm pull --untar ${HKUBE_CHART_REPO} --version ${VERSION}
+mkdir -p chart
+helm pull ${HKUBE_CHART_REPO} --version ${VERSION} -d chart
+tar xfv ./chart/hkube-${VERSION}.tgz 
 mkdir -p dockers
 curl -Lo image-export-import https://github.com/kube-HPC/image-exprort-import/releases/latest/download/image-export-import && chmod +x image-export-import
 curl -Lo hkubectl https://github.com/kube-HPC/hkubectl/releases/latest/download/hkubectl-linux && chmod +x hkubectl

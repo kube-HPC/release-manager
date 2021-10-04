@@ -27,9 +27,25 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 14.x
-      - run: |
+      - name: docker login
+        run: |
+            echo $OUT_REG_PASSWORD | docker login $OUT_REG_URL -u $OUT_REG_USERNAME --password-stdin
+        env:
+          OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
+          OUT_REG_USERNAME: '${{ secrets.OUT_REG_USERNAME }}'
+          OUT_REG_PASSWORD: '${{ secrets.OUT_REG_PASSWORD }}'
+      - name: download version
+        run: |
             ./scripts/getHkubeVersion.sh
         env:
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
-      - run: |
-            ls -la $BASE_DIR
+      - name: push to registry
+        run: |
+          echo pushing to $OUT_REG_URL
+          curl -u$OUT_REG_USERNAME:$OUT_REG_PASSWORD -T $BASE_DIR/chart/hkube-$VERSION.tgz "https://$OUT_REG_URL/artifactory/hkube-helm/hkube-$VERSION.tgz"
+          $BASE_DIR/hkube-$VERSION/image-export-import load --path $BASE_DIR/hkube-$VERSION/dockers/hkube --registry $OUT_REG_URL/hkube-docker
+          $BASE_DIR/hkube-$VERSION/image-export-import load --path $BASE_DIR/hkube-$VERSION/dockers/thirdparty --registry $OUT_REG_URL/hkube-docker
+        env:
+          OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
+          OUT_REG_USERNAME: '${{ secrets.OUT_REG_USERNAME }}'
+          OUT_REG_PASSWORD: '${{ secrets.OUT_REG_PASSWORD }}'
