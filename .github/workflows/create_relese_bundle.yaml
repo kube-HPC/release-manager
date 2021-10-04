@@ -1,0 +1,52 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI-CREATE-RELEASE_BUNDLE
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: hkube version to push freeze
+        required: true
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+env:
+  VERSION: '${{ github.event.client_payload.VERSION || github.event.inputs.VERSION }}'
+  BASE_DIR: '/tmp/downloads'
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - uses: jfrog/setup-jfrog-cli@v2
+        env:
+          JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+      - run: |
+          # Ping the server
+          jfrog rt ping
+      - run: jfrog plugin install rb-gen
+      - run: |
+          echo using version ${VERSION}
+          VERSION2="${VERSION#[vV]}"
+          VERSION_MAJOR="${VERSION2%%\.*}"
+          VERSION_MINOR="${VERSION2#*.}"
+          VERSION_MINOR="${VERSION_MINOR%.*}"
+          VERSION_PATCH="${VERSION2##*.}"
+          BUNDLE_NAME=v${VERSION_MAJOR}.$VERSION_MINOR
+          echo BUNDLE_NAME=$BUNDLE_NAME >> $GITHUB_ENV
+      - run: |
+          jfrog rb-gen from-chart --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
+            --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
+        env:
+          OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
+          OUT_REG_USERNAME: '${{ secrets.OUT_REG_USERNAME }}'
+          OUT_REG_PASSWORD: '${{ secrets.OUT_REG_PASSWORD }}'
