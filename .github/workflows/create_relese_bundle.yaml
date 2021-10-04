@@ -29,7 +29,7 @@ jobs:
           node-version: 14.x
       - uses: jfrog/setup-jfrog-cli@v2
         env:
-          JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+          JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_1 }}
       - run: |
           # Ping the server
           jfrog rt ping
