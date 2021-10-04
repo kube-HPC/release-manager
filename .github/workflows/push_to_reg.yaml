@@ -42,7 +42,7 @@ jobs:
       - name: push to registry
         run: |
           echo pushing to $OUT_REG_URL
-          curl -u$OUT_REG_USERNAME:$OUT_REG_PASSWORD -T $BASE_DIR/chart/hkube-$VERSION/hkube-$VERSION.tgz "https://$OUT_REG_URL/artifactory/hkube-helm/hkube-$VERSION.tgz"
+          curl -u$OUT_REG_USERNAME:$OUT_REG_PASSWORD -T $BASE_DIR/hkube-$VERSION/chart/hkube-$VERSION.tgz "https://$OUT_REG_URL/artifactory/hkube-helm/hkube-$VERSION.tgz"
           $BASE_DIR/hkube-$VERSION/image-export-import load --path $BASE_DIR/hkube-$VERSION/dockers/hkube --registry $OUT_REG_URL/hkube-docker
           $BASE_DIR/hkube-$VERSION/image-export-import load --path $BASE_DIR/hkube-$VERSION/dockers/thirdparty --registry $OUT_REG_URL/hkube-docker
         env:
