@@ -62,7 +62,7 @@ jobs:
           tmpfile=$(mktemp)
           cat /tmp/spec.json | jq --arg ver hkube-helm/hkube-$VERSION.tgz '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
           cat /tmp/spec.json | jq --arg ver "hkube-helm/*/hkube-$VERSION.tgz" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
-          cat /tmp/spec.json | jq --arg ver "hkube-pypi/*" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
+          cat /tmp/spec.json | jq --arg ver "hkube-pypi/*/" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
 
           jfrog ds rbc --sign --spec /tmp/spec.json --desc "hkube $VERSION release" --release-notes-path /tmp/rn.md --release-notes-syntax markdown hkube-$BUNDLE_NAME $VERSION
 
