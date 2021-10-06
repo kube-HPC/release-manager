@@ -33,8 +33,8 @@ jobs:
       - run: |
           # Ping the server
           jfrog rt ping
-      - run: jfrog plugin install rb-gen
-      - run: |
+      - name: parse version
+        run: |
           echo using version ${VERSION}
           VERSION2="${VERSION#[vV]}"
           VERSION_MAJOR="${VERSION2%%\.*}"
@@ -44,17 +44,27 @@ jobs:
           BUNDLE_NAME=v${VERSION_MAJOR}.$VERSION_MINOR
           echo BUNDLE_NAME=$BUNDLE_NAME >> $GITHUB_ENV
           echo VERSION_PATCH=$VERSION_PATCH >> $GITHUB_ENV
-      - run: |
+      - name: create release notes
+        run: |
           echo "# Release Notes" > /tmp/rn.md
           echo "## Version: $BUNDLE_NAME" >> /tmp/rn.md
           echo "Patch: $VERSION_PATCH" >> /tmp/rn.md
           echo "### New Features" >> /tmp/rn.md
           echo "1. add fluent bit [#1407](https://github.com/kube-HPC/hkube/pull/1407)" >> /tmp/rn.md
           echo "### Closed Issues" >> /tmp/rn.md
-          echo "1. fix error with preschedule [1411](https://github.com/kube-HPC/hkube/pull/1411)" >> /tmp/rn.md
+          echo "1. fix error with preschedule [#1411](https://github.com/kube-HPC/hkube/pull/1411)" >> /tmp/rn.md
+      - name: create rb
+        run: |
+          curl -Lo image-export-import https://github.com/kube-HPC/image-exprort-import/releases/latest/download/image-export-import && chmod +x image-export-import
+          ./image-export-import createPatterns --path /tmp/spec.json --patternPrefix hkube-docker --chartPath ./hkube/ --options "global.sidecars.fluent_bit.enable=true,jaeger.enable=true,nginx-ingress.enable=true,minio.enable=true,global.image_pull_secret.use_existing=false,global.clusterName=download,global.k8senv=kubernetes"
+          tmpfile=$(mktemp)
+          cat /tmp/spec.json | jq --arg ver hkube-helm/hkube-$VERSION.tgz '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
+          cat /tmp/spec.json | jq --arg ver "hkube-helm/*/hkube-$VERSION.tgz" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
 
-          ./scripts/rb-gen from-chart --sign --release-notes-path /tmp/rn.md --release-notes-syntax markdown --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
-            --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
+          jfrog ds rbc --spec /tmp/spec.json --desc "hkube $VERSION release" --release-notes-path /tmp/rn.md --release-notes-syntax markdown hkube-$BUNDLE_NAME $VERSION
+
+          # ./scripts/rb-gen from-chart --sign --release-notes-path /tmp/rn.md --release-notes-syntax markdown --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
+          #   --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
         env:
           OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
           OUT_REG_USERNAME: '${{ secrets.OUT_REG_USERNAME }}'
