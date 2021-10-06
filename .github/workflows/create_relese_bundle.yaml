@@ -53,6 +53,8 @@ jobs:
           echo "1. add fluent bit [#1407](https://github.com/kube-HPC/hkube/pull/1407)" >> /tmp/rn.md
           echo "### Closed Issues" >> /tmp/rn.md
           echo "1. fix error with preschedule [#1411](https://github.com/kube-HPC/hkube/pull/1411)" >> /tmp/rn.md
+      - name: get chart
+        run: jfrog rt dl "hkube-helm/hkube-v$VERSION.tgz" && tar xfv hkube-v$VERSION.tgz
       - name: create rb
         run: |
           curl -Lo image-export-import https://github.com/kube-HPC/image-exprort-import/releases/latest/download/image-export-import && chmod +x image-export-import
