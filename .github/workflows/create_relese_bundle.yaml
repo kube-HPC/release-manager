@@ -62,8 +62,9 @@ jobs:
           tmpfile=$(mktemp)
           cat /tmp/spec.json | jq --arg ver hkube-helm/hkube-$VERSION.tgz '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
           cat /tmp/spec.json | jq --arg ver "hkube-helm/*/hkube-$VERSION.tgz" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
+          cat /tmp/spec.json | jq --arg ver "hkube-pypi/*" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
 
-          jfrog ds rbc --spec /tmp/spec.json --desc "hkube $VERSION release" --release-notes-path /tmp/rn.md --release-notes-syntax markdown hkube-$BUNDLE_NAME $VERSION
+          jfrog ds rbc --sign --spec /tmp/spec.json --desc "hkube $VERSION release" --release-notes-path /tmp/rn.md --release-notes-syntax markdown hkube-$BUNDLE_NAME $VERSION
 
           # ./scripts/rb-gen from-chart --sign --release-notes-path /tmp/rn.md --release-notes-syntax markdown --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
           #   --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
