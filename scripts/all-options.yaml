@@ -1,0 +1,15 @@
+global:
+  clusterName: download
+  k8senv: kubernetes
+  image_pull_secret:
+    use_existing:
+      false
+  sidecars:
+    fluent_bit:
+      enable: true
+jaeger:
+  enable: true
+nginx-ingress:
+  enable: true
+minio:
+  enable: true

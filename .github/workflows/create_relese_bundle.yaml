@@ -44,7 +44,7 @@ jobs:
           BUNDLE_NAME=v${VERSION_MAJOR}.$VERSION_MINOR
           echo BUNDLE_NAME=$BUNDLE_NAME >> $GITHUB_ENV
       - run: |
-          jfrog rb-gen from-chart --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
+          ./scripts/rb-gen from-chart --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
             --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
         env:
           OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
