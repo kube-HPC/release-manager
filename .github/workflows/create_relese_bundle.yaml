@@ -43,8 +43,17 @@ jobs:
           VERSION_PATCH="${VERSION2##*.}"
           BUNDLE_NAME=v${VERSION_MAJOR}.$VERSION_MINOR
           echo BUNDLE_NAME=$BUNDLE_NAME >> $GITHUB_ENV
+          echo VERSION_PATCH=$VERSION_PATCH >> $GITHUB_ENV
       - run: |
-          ./scripts/rb-gen from-chart --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
+          echo "# Release Notes" > /tmp/rn.md
+          echo "## Version: $BUNDLE_NAME" >> /tmp/rn.md
+          echo "Patch: $VERSION_PATCH" >> /tmp/rn.md
+          echo "### New Features" >> /tmp/rn.md
+          echo "1. add fluent bit [#1407](https://github.com/kube-HPC/hkube/pull/1407)" >> /tmp/rn.md
+          echo "### Closed Issues" >> /tmp/rn.md
+          echo "1. fix error with preschedule [1411](https://github.com/kube-HPC/hkube/pull/1411)" >> /tmp/rn.md
+
+          ./scripts/rb-gen from-chart --release-notes-path /tmp/rn.md --release-notes-syntax markdown --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
             --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
         env:
           OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
