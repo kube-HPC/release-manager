@@ -53,7 +53,7 @@ jobs:
           echo "### Closed Issues" >> /tmp/rn.md
           echo "1. fix error with preschedule [1411](https://github.com/kube-HPC/hkube/pull/1411)" >> /tmp/rn.md
 
-          ./scripts/rb-gen from-chart --release-notes-path /tmp/rn.md --release-notes-syntax markdown --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
+          ./scripts/rb-gen from-chart --sign --release-notes-path /tmp/rn.md --release-notes-syntax markdown --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
             --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
         env:
           OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
