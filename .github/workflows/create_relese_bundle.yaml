@@ -72,3 +72,7 @@ jobs:
           OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
           OUT_REG_USERNAME: '${{ secrets.OUT_REG_USERNAME }}'
           OUT_REG_PASSWORD: '${{ secrets.OUT_REG_PASSWORD }}'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: spec.json
+          path: /tmp/spec.json
