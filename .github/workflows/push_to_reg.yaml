@@ -10,10 +10,14 @@ on:
       VERSION:
         description: hkube version to push to artifactory
         required: true
+      DEV_VERSION:
+        description: is it a dev version (hkube-dev)
+        required: false
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 env:
   VERSION: '${{ github.event.client_payload.VERSION || github.event.inputs.VERSION }}'
   BASE_DIR: '/tmp/downloads'
+  DEV_VERSION: '${{ github.event.client_payload.DEV_VERSION || github.event.inputs.DEV_VERSION }}'
 jobs:
   # This workflow contains a single job called "build"
   build:
