@@ -11,7 +11,7 @@ on:
         description: branch name to create (e.g. release_v2.1)
         required: true
       VERSION:
-        description: version to freeze in branch (the full release name, e.g. v2.1.90-1633941397972)
+        description: helm version to freeze in branch (e.g. v2.1.171)
         required: true
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 env:
@@ -31,10 +31,18 @@ jobs:
         with:
           node-version: 14.x
       - run: npm ci
+      - name: get helm
+        run: |
+          curl -Lo /tmp/hkube-${VERSION}.tgz https://hkube.io/helm/dev/hkube-${VERSION}.tgz
+          mkdir -p /tmp/hkube-$VERSION/
+          tar xfv /tmp/hkube-${VERSION}.tgz -C /tmp/hkube-$VERSION/
+          SYSTEM_VERSION=$(yq e '.fullSystemVersion' /tmp/hkube-$VERSION/hkube/values.yaml)
+          echo SYSTEM_VERSION=$SYSTEM_VERSION >> $GITHUB_ENV
       - run: |
-          curl -L0 version.json https://github.com/kube-HPC/release-manager/releases/download/${VERSION}/version.json
+          curl -Lo version.json https://github.com/kube-HPC/release-manager/releases/download/${SYSTEM_VERSION}/version.json
           export TAG=$(jq -r .fullSystemVersion ./version.json)
           echo TAG=$TAG >> $GITHUB_ENV
         env:
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
+          
       
