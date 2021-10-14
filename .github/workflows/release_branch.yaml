@@ -53,6 +53,8 @@ jobs:
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
       - name: create branch
         run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           mkdir -p ${BASE_FOLDER}
           node scripts/create-branch-action.js
         env:
