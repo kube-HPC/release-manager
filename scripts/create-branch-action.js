@@ -9,6 +9,7 @@ const SYSTEM_VERSION = process.env.SYSTEM_VERSION;
 const RELEASE_BRANCH = process.env.RELEASE_BRANCH;
 const GH_TOKEN = process.env.GH_TOKEN;
 const BASE_FOLDER = process.env.BASE_FOLDER;
+const VERSION_TYPE=process.env.VERSION_TYPE;
 const orgUrl = 'github.com/kube-HPC'
 const coreRepos = [
     'algorithm-builder',
@@ -57,6 +58,10 @@ const main = async () => {
     }
     if (!BASE_FOLDER) {
         console.error('missing env variable BASE_FOLDER')
+        process.exit(-1);
+    }
+    if (!VERSION_TYPE) {
+        console.error('missing env variable VERSION_TYPE')
         process.exit(-1);
     }
     const versions = JSON.parse(fs.readFileSync('./version.json'));
@@ -117,6 +122,35 @@ const main = async () => {
             await git.checkoutLocalBranch(branchName)
             await git.push(['--set-upstream','origin',branchName])
             await git.checkout(`${ master }`)
+        }
+        catch (e) {
+            console.error(e)
+            errors.push({
+                repo: v.project,
+                error: e
+            })
+        }
+    }
+    if (errors.length) {
+        console.error(`got errors in ${errors.length} repositories`);
+        process.exit(-1)
+    }
+    errors = [];
+    for (let v of repoVersions) {
+        try {
+            console.log(`${v.project}: ${v.tag}`);
+            const repoFolder = path.join(BASE_FOLDER, v.project);
+            const git = simpleGit({ baseDir: repoFolder });
+            const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
+            
+            const a = await git.branch('-r')
+            const master = a.branches.master ? 'master' : 'main';
+            console.log(`master branch name is ${master}`)
+
+            console.log(`bumping ${VERSION_TYPE} version ${v.project}`);
+            await git.checkout(`${ master }`)
+            await syncSpawn('npm',['version',VERSION_TYPE],{cwd: repoFolder,stdio: 'inherit' })
+            await git.push(['--follow-tags'])
         }
         catch (e) {
             console.error(e)
