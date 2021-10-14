@@ -7,7 +7,7 @@ const VERSION = process.env.VERSION;
 const SYSTEM_VERSION = process.env.SYSTEM_VERSION;
 const RELEASE_BRANCH = process.env.RELEASE_BRANCH;
 const GH_TOKEN = process.env.GH_TOKEN;
-const baseFolder = process.env.BASE_FOLDER;
+const BASE_FOLDER = process.env.BASE_FOLDER;
 const orgUrl = 'github.com/kube-HPC'
 const coreRepos = [
     'algorithm-builder',
@@ -64,8 +64,8 @@ const main = async () => {
     for (let v of repoVersions) {
         try {
             console.log(`${ v.project }: ${ v.tag }`);
-            const repoFolder = path.join(baseFolder, v.project);
-            let git = simpleGit({ baseDir: baseFolder })
+            const repoFolder = path.join(BASE_FOLDER, v.project);
+            let git = simpleGit({ baseDir: BASE_FOLDER })
             await git.clone(`https://${GH_TOKEN}@${orgUrl}/${v.project}`)
             git = simpleGit({ baseDir: repoFolder });
             await git.checkout(`${ v.tag }`);
