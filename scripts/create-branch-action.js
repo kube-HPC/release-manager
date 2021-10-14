@@ -111,11 +111,10 @@ const main = async () => {
                 error: e
             })
         }
-
-        if (errors.length) {
-            console.error(`got errors in ${errors.length} repositories`);
-            exit(-1)
-        }
+    }
+    if (errors.length) {
+        console.error(`got errors in ${errors.length} repositories`);
+        exit(-1)
     }
     errors = [];
     for (let v of repoVersions) {
@@ -134,7 +133,7 @@ const main = async () => {
             // await git.fetch()
             // await git.checkout(`${ v.tag }`)
 
-            await git.checkout(branchName)
+            await git.checkoutLocalBranch(branchName)
 
             // await git.checkout(`${ master }`)
             // // await syncSpawn('git',['checkout','master'],{cwd: repoFolder,stdio: 'inherit' })
@@ -154,11 +153,10 @@ const main = async () => {
                 error: e
             })
         }
-
-        if (errors.length) {
-            console.error(`got errors in ${errors.length} repositories`);
-            exit(-1)
-        }
+    }
+    if (errors.length) {
+        console.error(`got errors in ${errors.length} repositories`);
+        exit(-1)
     }
 }
 
