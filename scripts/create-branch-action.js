@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const syncSpawn = require('spawn-sync');
 const simpleGit = require('simple-git');
+const { error } = require('console');
 
 const VERSION = process.env.VERSION;
 const SYSTEM_VERSION = process.env.SYSTEM_VERSION;
@@ -65,6 +66,7 @@ const main = async () => {
     const repoVersions = versions.versions.filter(v => !coreRepos.includes(v.project)).concat(hkubeRepo, helmRepo)
     const branchName = RELEASE_BRANCH
     console.log(`Cloning all repos for version ${SYSTEM_VERSION}`)
+    const errors=[];
     for (let v of repoVersions) {
         try {
             console.log(`${v.project}: ${v.tag}`);
@@ -104,6 +106,15 @@ const main = async () => {
         }
         catch (e) {
             console.error(e)
+            errors.push({
+                repo: v.project,
+                error: e
+            })
+        }
+
+        if (errors.length) {
+            console.error(`got errors in ${errors.length} repositories`);
+            exit(-1)
         }
     }
 }
