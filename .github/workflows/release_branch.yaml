@@ -56,6 +56,7 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           mkdir -p ${BASE_FOLDER}
+          npm i -g lerna@3.18.3
           node scripts/create-branch-action.js
         env:
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'

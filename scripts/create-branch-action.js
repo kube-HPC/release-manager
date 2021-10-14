@@ -9,7 +9,7 @@ const SYSTEM_VERSION = process.env.SYSTEM_VERSION;
 const RELEASE_BRANCH = process.env.RELEASE_BRANCH;
 const GH_TOKEN = process.env.GH_TOKEN;
 const BASE_FOLDER = process.env.BASE_FOLDER;
-const VERSION_TYPE=process.env.VERSION_TYPE;
+const VERSION_TYPE = process.env.VERSION_TYPE;
 const orgUrl = 'github.com/kube-HPC'
 const coreRepos = [
     'algorithm-builder',
@@ -30,7 +30,7 @@ const coreRepos = [
     'worker',
 ];
 
-const deprecatedRepos=[
+const deprecatedRepos = [
     'storage-cleaner',
     'pipeline-cleaner',
     'etcd-cleaner',
@@ -120,8 +120,8 @@ const main = async () => {
             console.log(`master branch name is ${master}`)
 
             await git.checkoutLocalBranch(branchName)
-            await git.push(['--set-upstream','origin',branchName])
-            await git.checkout(`${ master }`)
+            await git.push(['--set-upstream', 'origin', branchName])
+            await git.checkout(`${master}`)
         }
         catch (e) {
             console.error(e)
@@ -142,14 +142,32 @@ const main = async () => {
             const repoFolder = path.join(BASE_FOLDER, v.project);
             const git = simpleGit({ baseDir: repoFolder });
             const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
-            
+
             const a = await git.branch('-r')
             const master = a.branches.master ? 'master' : 'main';
             console.log(`master branch name is ${master}`)
 
             console.log(`bumping ${VERSION_TYPE} version ${v.project}`);
-            await git.checkout(`${ master }`)
-            await syncSpawn('npm',['version',VERSION_TYPE],{cwd: repoFolder,stdio: 'inherit' })
+            await git.checkout(`${master}`)
+            if (v.project === 'hkube') {
+                await syncSpawn('lerna', [
+                    'version',
+                    VERSION_TYPE,
+                    '--no-push',
+                    '--yes',
+                    '--includeMergedTags',
+                    '--no-git-tag-version',
+                    '--no-commit-hooks',
+                    '--force-publish', '*'
+                ], { cwd: repoFolder, stdio: 'inherit' })
+                await git.add('core/*/package-lock.json');
+                await git.add('core/*/package.json');
+                await git.commit('update versions', ['--no-verify'])
+                await syncSpawn('npm', ['version', VERSION_TYPE, '--git-tag-version', '--commit-hooks', 'false'], { cwd: repoFolder, stdio: 'inherit' })
+            }
+            else {
+                await syncSpawn('npm', ['version', VERSION_TYPE, '--commit-hooks', 'false'], { cwd: repoFolder, stdio: 'inherit' })
+            }
             await git.push(['--follow-tags'])
         }
         catch (e) {
