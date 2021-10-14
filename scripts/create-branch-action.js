@@ -66,7 +66,7 @@ const main = async () => {
     const repoVersions = versions.versions.filter(v => !coreRepos.includes(v.project)).concat(hkubeRepo, helmRepo)
     const branchName = RELEASE_BRANCH
     console.log(`Cloning all repos for version ${SYSTEM_VERSION}`)
-    const errors=[];
+    let errors = [];
     for (let v of repoVersions) {
         try {
             console.log(`${v.project}: ${v.tag}`);
@@ -92,6 +92,49 @@ const main = async () => {
 
             // await git.checkout(branchName)
             // await syncSpawn('git',['push','--set-upstream','origin',branchName],{cwd: repoFolder,stdio: 'inherit' })
+
+            // await git.checkout(`${ master }`)
+            // // await syncSpawn('git',['checkout','master'],{cwd: repoFolder,stdio: 'inherit' })
+
+            // await syncSpawn('npm', ['version', 'minor'], { cwd: repoFolder, stdio: 'inherit' })
+            // await syncSpawn('git', ['push', '--follow-tags'], { cwd: repoFolder, stdio: 'inherit' })
+
+
+            // await syncSpawn('git',[`status`],{cwd: repoFolder,stdio: 'inherit' })
+
+
+        }
+        catch (e) {
+            console.error(e)
+            errors.push({
+                repo: v.project,
+                error: e
+            })
+        }
+
+        if (errors.length) {
+            console.error(`got errors in ${errors.length} repositories`);
+            exit(-1)
+        }
+    }
+    errors = [];
+    for (let v of repoVersions) {
+        try {
+            console.log(`${v.project}: ${v.tag}`);
+            const repoFolder = path.join(BASE_FOLDER, v.project);
+            const git = simpleGit({ baseDir: repoFolder });
+            const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
+            console.log(`creating branch ${branchName} in ${v.project} from tag ${packageJson.version}`);
+
+            // const status = await git.status();
+            const a = await git.branch('-r')
+            const master = a.branches.master ? 'master' : 'main';
+            console.log(`master branch name is ${master}`)
+            // // await git.checkout(`${ master }`)
+            // await git.fetch()
+            // await git.checkout(`${ v.tag }`)
+
+            await git.checkout(branchName)
 
             // await git.checkout(`${ master }`)
             // // await syncSpawn('git',['checkout','master'],{cwd: repoFolder,stdio: 'inherit' })
