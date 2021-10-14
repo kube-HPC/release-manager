@@ -134,8 +134,8 @@ const main = async () => {
             // await git.checkout(`${ v.tag }`)
 
             await git.checkoutLocalBranch(branchName)
-
-            // await git.checkout(`${ master }`)
+            await git.push(['--set-upstream','origin',branchName])
+            await git.checkout(`${ master }`)
             // // await syncSpawn('git',['checkout','master'],{cwd: repoFolder,stdio: 'inherit' })
 
             // await syncSpawn('npm', ['version', 'minor'], { cwd: repoFolder, stdio: 'inherit' })
