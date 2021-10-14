@@ -33,7 +33,8 @@ const deprecatedRepos=[
     'storage-cleaner',
     'pipeline-cleaner',
     'etcd-cleaner',
-    'datasource-cleaner'
+    'datasource-cleaner',
+    'clean-old-jobs'
 
 ]
 
