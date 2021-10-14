@@ -16,8 +16,8 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 env:
   VERSION: '${{ github.event.client_payload.VERSION || github.event.inputs.VERSION }}'
-  BASE_DIR: '/tmp/downloads'
-  BRANCH: '${{ github.event.client_payload.BRANCH || github.event.inputs.BRANCH }}'
+  BASE_FOLDER: '/tmp/source'
+  RELEASE_BRANCH: '${{ github.event.client_payload.BRANCH || github.event.inputs.BRANCH }}'
 jobs:
   # This workflow contains a single job called "build"
   build:
@@ -43,6 +43,10 @@ jobs:
           cat ./version.json
           export TAG=$(jq -r .fullSystemVersion ./version.json)
           echo TAG=$TAG >> $GITHUB_ENV
+        env:
+          GH_TOKEN: '${{ secrets.GH_TOKEN }}'
+      - run: |
+          node scripts/create-branch-action.js
         env:
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
           
