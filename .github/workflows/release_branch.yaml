@@ -46,6 +46,7 @@ jobs:
         env:
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
       - run: |
+          mkdir -p ${BASE_FOLDER}
           node scripts/create-branch-action.js
         env:
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
