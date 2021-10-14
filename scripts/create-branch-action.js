@@ -29,6 +29,14 @@ const coreRepos = [
     'worker',
 ];
 
+const deprecatedRepos=[
+    'storage-cleaner',
+    'pipeline-cleaner',
+    'etcd-cleaner',
+    'datasource-cleaner'
+
+]
+
 const main = async () => {
     if (!VERSION) {
         console.error('missing env variable VERSION')
@@ -63,7 +71,9 @@ const main = async () => {
         project: 'helm',
         tag: VERSION
     }
-    const repoVersions = versions.versions.filter(v => !coreRepos.includes(v.project)).concat(hkubeRepo, helmRepo)
+    const repoVersions = versions.versions.filter(v => !coreRepos.includes(v.project))
+        .filter(v => !deprecatedRepos.includes(v.project))
+        .concat(hkubeRepo, helmRepo);
     const branchName = RELEASE_BRANCH
     console.log(`Cloning all repos for version ${SYSTEM_VERSION}`)
     let errors = [];
@@ -77,32 +87,6 @@ const main = async () => {
             await git.checkout(`${v.tag}`);
             const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
             console.log(`cloned ${v.project} in tag ${packageJson.version}`);
-            // await syncSpawn('grep', ['-Po', '\\"version\\": \\"\\K(.*)(?=\\",)', 'package.json'], { cwd: repoFolder ,stdio: 'inherit'})
-
-
-            // await syncSpawn('git', ['status'], { cwd: repoFolder, stdio: 'inherit' })
-            // const status = await git.status();
-            // const a = await git.branch('-r')
-            // const master = a.branches.master ? 'master' : 'main';
-            // // await git.checkout(`${ master }`)
-            // await git.fetch()
-            // await git.checkout(`${ v.tag }`)
-            // await syncSpawn('git', ['status'], { cwd: repoFolder, stdio: 'inherit' })
-            // await syncSpawn('git',['checkout','-b',branchName],{cwd: repoFolder,stdio: 'inherit' })
-
-            // await git.checkout(branchName)
-            // await syncSpawn('git',['push','--set-upstream','origin',branchName],{cwd: repoFolder,stdio: 'inherit' })
-
-            // await git.checkout(`${ master }`)
-            // // await syncSpawn('git',['checkout','master'],{cwd: repoFolder,stdio: 'inherit' })
-
-            // await syncSpawn('npm', ['version', 'minor'], { cwd: repoFolder, stdio: 'inherit' })
-            // await syncSpawn('git', ['push', '--follow-tags'], { cwd: repoFolder, stdio: 'inherit' })
-
-
-            // await syncSpawn('git',[`status`],{cwd: repoFolder,stdio: 'inherit' })
-
-
         }
         catch (e) {
             console.error(e)
@@ -114,7 +98,7 @@ const main = async () => {
     }
     if (errors.length) {
         console.error(`got errors in ${errors.length} repositories`);
-        exit(-1)
+        process.exit(-1)
     }
     errors = [];
     for (let v of repoVersions) {
@@ -125,26 +109,13 @@ const main = async () => {
             const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
             console.log(`creating branch ${branchName} in ${v.project} from tag ${packageJson.version}`);
 
-            // const status = await git.status();
             const a = await git.branch('-r')
             const master = a.branches.master ? 'master' : 'main';
             console.log(`master branch name is ${master}`)
-            // // await git.checkout(`${ master }`)
-            // await git.fetch()
-            // await git.checkout(`${ v.tag }`)
 
             await git.checkoutLocalBranch(branchName)
             await git.push(['--set-upstream','origin',branchName])
             await git.checkout(`${ master }`)
-            // // await syncSpawn('git',['checkout','master'],{cwd: repoFolder,stdio: 'inherit' })
-
-            // await syncSpawn('npm', ['version', 'minor'], { cwd: repoFolder, stdio: 'inherit' })
-            // await syncSpawn('git', ['push', '--follow-tags'], { cwd: repoFolder, stdio: 'inherit' })
-
-
-            // await syncSpawn('git',[`status`],{cwd: repoFolder,stdio: 'inherit' })
-
-
         }
         catch (e) {
             console.error(e)
@@ -156,7 +127,7 @@ const main = async () => {
     }
     if (errors.length) {
         console.error(`got errors in ${errors.length} repositories`);
-        exit(-1)
+        process.exit(-1)
     }
 }
 
