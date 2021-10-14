@@ -40,6 +40,7 @@ jobs:
           echo SYSTEM_VERSION=$SYSTEM_VERSION >> $GITHUB_ENV
       - run: |
           curl -Lo version.json https://github.com/kube-HPC/release-manager/releases/download/${SYSTEM_VERSION}/version.json
+          cat ./version.json
           export TAG=$(jq -r .fullSystemVersion ./version.json)
           echo TAG=$TAG >> $GITHUB_ENV
         env:
