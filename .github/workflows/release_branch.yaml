@@ -13,6 +13,10 @@ on:
       VERSION:
         description: helm version to freeze in branch (e.g. v2.1.171)
         required: true
+      VERSION_TYPE:
+        description: version to increment (minor, major)
+        required: true
+        default: minor
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 env:
   VERSION: '${{ github.event.client_payload.VERSION || github.event.inputs.VERSION }}'

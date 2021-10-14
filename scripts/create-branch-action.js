@@ -11,13 +11,17 @@ const BASE_FOLDER = process.env.BASE_FOLDER;
 const orgUrl = 'github.com/kube-HPC'
 const coreRepos = [
     'algorithm-builder',
+    'algorithm-debug',
+    'algorithm-gateway',
     'algorithm-operator',
     'algorithm-queue',
     'api-server',
     'caching-service',
     'datasources-service',
-    'pipeline-driver',
+    'gc-service',
+    'openapi-spec',
     'pipeline-driver-queue',
+    'pipeline-driver',
     'resource-manager',
     'task-executor',
     'trigger-service',
@@ -56,20 +60,20 @@ const main = async () => {
     }
     const helmRepo = {
         project: 'helm',
-        tag: SYSTEM_VERSION
+        tag: VERSION
     }
     const repoVersions = versions.versions.filter(v => !coreRepos.includes(v.project)).concat(hkubeRepo, helmRepo)
     const branchName = RELEASE_BRANCH
     console.log(`Cloning all repos for version ${SYSTEM_VERSION}`)
     for (let v of repoVersions) {
         try {
-            console.log(`${ v.project }: ${ v.tag }`);
+            console.log(`${v.project}: ${v.tag}`);
             const repoFolder = path.join(BASE_FOLDER, v.project);
             let git = simpleGit({ baseDir: BASE_FOLDER })
             await git.clone(`https://${GH_TOKEN}@${orgUrl}/${v.project}`)
             git = simpleGit({ baseDir: repoFolder });
-            await git.checkout(`${ v.tag }`);
-            const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder,'./package.json')));
+            await git.checkout(`${v.tag}`);
+            const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
             console.log(`cloned ${v.project} in tag ${packageJson.version}`);
             // await syncSpawn('grep', ['-Po', '\\"version\\": \\"\\K(.*)(?=\\",)', 'package.json'], { cwd: repoFolder ,stdio: 'inherit'})
 
