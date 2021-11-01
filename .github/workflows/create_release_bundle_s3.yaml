@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
+      contents: read
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -34,7 +35,8 @@ jobs:
         with:
           role-to-assume: '${{ secrets.AWS_S3_ROLE }}'
           aws-region: eu-west-1
-      - run: |
+      - name: test credentials
+        run: |
           # test
           aws s3 ls s3://downloads.hkube.io
       - name: parse version
@@ -48,6 +50,15 @@ jobs:
           BUNDLE_NAME=v${VERSION_MAJOR}.$VERSION_MINOR
           echo BUNDLE_NAME=$BUNDLE_NAME >> $GITHUB_ENV
           echo VERSION_PATCH=$VERSION_PATCH >> $GITHUB_ENV
+      - name: download version
+        run: |
+            ./scripts/getHkubeVersion.sh
+        env:
+          GH_TOKEN: '${{ secrets.GH_TOKEN }}'
+          COMPRESS: "true"
+      - name: upload
+        run: |
+          aws s3 cp hkube-${VERSION}.tgz s3://downloads.hkube.io/${VERSION}/
       # - name: get chart
       #   run: jfrog rt dl "hkube-helm/hkube-$VERSION.tgz" && tar xfv hkube-$VERSION.tgz
       # - name: create rb
