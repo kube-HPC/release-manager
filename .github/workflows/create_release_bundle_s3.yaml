@@ -34,6 +34,8 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::$AWS_ACCOUNT:role/hkube-s3-access
           aws-region: eu-west-1
+        env:
+          AWS_ACCOUNT: '${{ secrets.AWS_ACCOUNT }}'
       - run: |
           # test
           aws s3 ls s3://downloads.hkube.io
