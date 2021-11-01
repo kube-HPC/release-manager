@@ -1,0 +1,71 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI-CREATE-RELEASE_BUNDLE_S3
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: hkube version to push freeze
+        required: true
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+env:
+  VERSION: '${{ github.event.client_payload.VERSION || github.event.inputs.VERSION }}'
+  BASE_DIR: '/tmp/downloads'
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::999676289792:role/hkube-s3-access
+          aws-region: eu-west-1
+      - run: |
+          # test
+          aws s3 ls s3://downloads.hkube.io
+      - name: parse version
+        run: |
+          echo using version ${VERSION}
+          VERSION2="${VERSION#[vV]}"
+          VERSION_MAJOR="${VERSION2%%\.*}"
+          VERSION_MINOR="${VERSION2#*.}"
+          VERSION_MINOR="${VERSION_MINOR%.*}"
+          VERSION_PATCH="${VERSION2##*.}"
+          BUNDLE_NAME=v${VERSION_MAJOR}.$VERSION_MINOR
+          echo BUNDLE_NAME=$BUNDLE_NAME >> $GITHUB_ENV
+          echo VERSION_PATCH=$VERSION_PATCH >> $GITHUB_ENV
+      # - name: get chart
+      #   run: jfrog rt dl "hkube-helm/hkube-$VERSION.tgz" && tar xfv hkube-$VERSION.tgz
+      # - name: create rb
+      #   run: |
+      #     curl -Lo image-export-import https://github.com/kube-HPC/image-exprort-import/releases/latest/download/image-export-import && chmod +x image-export-import
+      #     ./image-export-import createPatterns --path /tmp/spec.json --patternPrefix hkube-docker --chartPath ./hkube/ --options "global.sidecars.fluent_bit.enable=true,jaeger.enable=true,nginx-ingress.enable=true,minio.enable=true,global.image_pull_secret.use_existing=false,global.clusterName=download,global.k8senv=kubernetes"
+      #     tmpfile=$(mktemp)
+      #     cat /tmp/spec.json | jq --arg ver hkube-helm/hkube-$VERSION.tgz '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
+      #     cat /tmp/spec.json | jq --arg ver "hkube-helm/*/hkube-$VERSION.tgz" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
+      #     cat /tmp/spec.json | jq --arg ver "hkube-pypi/*/" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
+
+      #     jfrog ds rbc --sign --spec /tmp/spec.json --desc "hkube $VERSION release" --release-notes-path /tmp/rn.md --release-notes-syntax markdown hkube-$BUNDLE_NAME $VERSION
+
+      #     # ./scripts/rb-gen from-chart --sign --release-notes-path /tmp/rn.md --release-notes-syntax markdown --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
+      #     #   --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
+      #   env:
+      #     OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
+      #     OUT_REG_USERNAME: '${{ secrets.OUT_REG_USERNAME }}'
+      #     OUT_REG_PASSWORD: '${{ secrets.OUT_REG_PASSWORD }}'
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: spec.json
+      #     path: /tmp/spec.json
