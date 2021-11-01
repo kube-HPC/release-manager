@@ -50,6 +50,15 @@ jobs:
           BUNDLE_NAME=v${VERSION_MAJOR}.$VERSION_MINOR
           echo BUNDLE_NAME=$BUNDLE_NAME >> $GITHUB_ENV
           echo VERSION_PATCH=$VERSION_PATCH >> $GITHUB_ENV
+      - name: get chart
+        run: wget -wget https://hkube.io/helm/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
+      - name: create download script
+        run: |
+          ./image-export-import createScript --path /tmp/download-hkube.sh --chartPath ./hkube/ --options "global.sidecars.fluent_bit.enable=true,jaeger.enable=true,nginx-ingress.enable=true,minio.enable=true,global.image_pull_secret.use_existing=false,global.clusterName=download,global.k8senv=kubernetes"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: download-hkube.sh
+          path: /tmp/download-hkube.sh         
       - name: download version
         run: |
             ./scripts/getHkubeVersion.sh
@@ -58,9 +67,9 @@ jobs:
           COMPRESS: "true"
       - name: upload
         run: |
-          aws s3 cp hkube-${VERSION}.tgz s3://downloads.hkube.io/${VERSION}/
-      # - name: get chart
-      #   run: jfrog rt dl "hkube-helm/hkube-$VERSION.tgz" && tar xfv hkube-$VERSION.tgz
+          aws s3 cp ${BASE_DIR}/hkube-${VERSION}/hkube-${VERSION}.tgz s3://downloads.hkube.io/${VERSION}/
+      
+      
       # - name: create rb
       #   run: |
       #     curl -Lo image-export-import https://github.com/kube-HPC/image-exprort-import/releases/latest/download/image-export-import && chmod +x image-export-import
