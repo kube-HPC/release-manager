@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 14.x
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@e21f7333e801ca751f058cc52de17f0ee6e1da6f
         with:
           role-to-assume: arn:aws:iam::$AWS_ACCOUNT:role/hkube-s3-access
           aws-region: eu-west-1
