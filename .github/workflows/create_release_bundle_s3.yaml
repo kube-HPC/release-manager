@@ -32,10 +32,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e21f7333e801ca751f058cc52de17f0ee6e1da6f
         with:
-          role-to-assume: $AWS_S3_ROLE
+          role-to-assume: '${{ secrets.AWS_S3_ROLE }}'
           aws-region: eu-west-1
-        env:
-          AWS_S3_ROLE: '${{ secrets.AWS_S3_ROLE }}'
       - run: |
           # test
           aws s3 ls s3://downloads.hkube.io
