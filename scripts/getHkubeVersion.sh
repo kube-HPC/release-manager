@@ -59,17 +59,14 @@ sleep 5
 mv ${APP_VERSION} dockers/hkube
 mv thirdparty dockers/
 if [ ! -z $COMPRESS ]; then
-    echo compressing 
-    tar cfz hkube-${VERSION}.tgz hkube dockers image-export-import hkubectl*
-    echo ${VERSION} is ready at $(realpath hkube-${VERSION}.tgz)
-    if [ ! -z $SPLIT ]; then
-        echo splitting hkube-${VERSION}.tgz...
-        pushd . >/dev/null
-        mkdir -p splits
-        cd splits
-        split -b 100M ../hkube-${VERSION}.tgz hkube-${VERSION}-
-        echo splits are ready at $(realpath .)
-        popd >/dev/null
+    echo compressing
+    if [ -z $PREV_VERSION ]
+    then
+      export TAR_FILE_NAME=hkube-${VERSION}.tgz
+    else
+      export TAR_FILE_NAME=hkube-diff-${PREV_VERSION}-${VERSION}.tgz
     fi
+    tar cfz ${TAR_FILE_NAME} hkube dockers image-export-import hkubectl*
+    echo ${VERSION} is ready at $(realpath ${TAR_FILE_NAME})
 fi
 

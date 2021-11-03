@@ -10,9 +10,17 @@ on:
       VERSION:
         description: hkube version to push freeze
         required: true
+      PREV_VERSION:
+        description: previous hkube version to compare to 
+        required: false
+      DEV_VERSION:
+        description: set to TRUE for dev version
+      
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 env:
   VERSION: '${{ github.event.client_payload.VERSION || github.event.inputs.VERSION }}'
+  PREV_VERSION: '${{ github.event.client_payload.PREV_VERSION || github.event.inputs.PREV_VERSION }}'
+  DEV_VERSION: '${{ github.event.client_payload.DEV_VERSION || github.event.inputs.DEV_VERSION }}'
   BASE_DIR: '/tmp/downloads'
 jobs:
   # This workflow contains a single job called "build"
@@ -68,27 +76,10 @@ jobs:
           COMPRESS: "true"
       - name: upload
         run: |
-          aws s3 cp ${BASE_DIR}/hkube-${VERSION}/hkube-${VERSION}.tgz s3://downloads.hkube.io/${VERSION}/
-      
-      
-      # - name: create rb
-      #   run: |
-      #     curl -Lo image-export-import https://github.com/kube-HPC/image-exprort-import/releases/latest/download/image-export-import && chmod +x image-export-import
-      #     ./image-export-import createPatterns --path /tmp/spec.json --patternPrefix hkube-docker --chartPath ./hkube/ --options "global.sidecars.fluent_bit.enable=true,jaeger.enable=true,nginx-ingress.enable=true,minio.enable=true,global.image_pull_secret.use_existing=false,global.clusterName=download,global.k8senv=kubernetes"
-      #     tmpfile=$(mktemp)
-      #     cat /tmp/spec.json | jq --arg ver hkube-helm/hkube-$VERSION.tgz '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
-      #     cat /tmp/spec.json | jq --arg ver "hkube-helm/*/hkube-$VERSION.tgz" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
-      #     cat /tmp/spec.json | jq --arg ver "hkube-pypi/*/" '.files += [{"pattern": $ver}]' > $tmpfile && cp $tmpfile /tmp/spec.json
-
-      #     jfrog ds rbc --sign --spec /tmp/spec.json --desc "hkube $VERSION release" --release-notes-path /tmp/rn.md --release-notes-syntax markdown hkube-$BUNDLE_NAME $VERSION
-
-      #     # ./scripts/rb-gen from-chart --sign --release-notes-path /tmp/rn.md --release-notes-syntax markdown --values-file ./scripts/all-options.yaml --chart-path=hkube-helm/hkube-$VERSION.tgz --docker-repo=hkube-docker --url https://$OUT_REG_URL/artifactory\
-      #     #   --user $OUT_REG_USERNAME --password $OUT_REG_PASSWORD --dist-url https://$OUT_REG_URL/distribution/ hkube-$BUNDLE_NAME $VERSION
-      #   env:
-      #     OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
-      #     OUT_REG_USERNAME: '${{ secrets.OUT_REG_USERNAME }}'
-      #     OUT_REG_PASSWORD: '${{ secrets.OUT_REG_PASSWORD }}'
-      # - uses: actions/upload-artifact@v2
-      #   with:
-      #     name: spec.json
-      #     path: /tmp/spec.json
+          if [ -z $PREV_VERSION ]
+          then
+            export TAR_FILE_NAME=hkube-${VERSION}.tgz
+          else
+            export TAR_FILE_NAME=hkube-diff-${PREV_VERSION}-${VERSION}.tgz
+          fi
+          aws s3 cp --acl public-read ${BASE_DIR}/hkube-${VERSION}/${TAR_FILE_NAME} s3://downloads.hkube.io/${VERSION}/
