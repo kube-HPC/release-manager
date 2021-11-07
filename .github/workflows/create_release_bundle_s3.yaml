@@ -15,6 +15,7 @@ on:
         required: false
       DEV_VERSION:
         description: set to TRUE for dev version
+        required: false
       
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 env:
