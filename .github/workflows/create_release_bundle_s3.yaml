@@ -59,7 +59,13 @@ jobs:
           echo BUNDLE_NAME=$BUNDLE_NAME >> $GITHUB_ENV
           echo VERSION_PATCH=$VERSION_PATCH >> $GITHUB_ENV
       - name: get chart
-        run: wget https://hkube.io/helm/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
+        run: |
+          if [ -z $PREV_VERSION ]
+          then
+            wget https://hkube.io/helm/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
+          else
+            wget https://hkube.io/helm/dev/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
+          fi
       - name: create download script
         run: |
           curl -Lo image-export-import https://github.com/kube-HPC/image-exprort-import/releases/latest/download/image-export-import && chmod +x image-export-import
