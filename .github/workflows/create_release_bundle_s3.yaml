@@ -60,7 +60,7 @@ jobs:
           echo VERSION_PATCH=$VERSION_PATCH >> $GITHUB_ENV
       - name: get chart
         run: |
-          if [ -z $PREV_VERSION ]
+          if [ -z $DEV_VERSION ]
           then
             wget https://hkube.io/helm/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
           else
