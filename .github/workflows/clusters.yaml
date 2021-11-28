@@ -18,7 +18,6 @@ on:
 env:
   CLUSTER_NAME: '${{ github.event.client_payload.CLUSTER_NAME || github.event.inputs.CLUSTER_NAME }}'
   ACTION: '${{ github.event.client_payload.ACTION || github.event.inputs.ACTION }}'
-  KOPS_STATE_STORE: s3://hkube-${CLUSTER_NAME}
 jobs:
   # This workflow contains a single job called "build"
   build:
@@ -31,38 +30,8 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: ./.github/actions/kops-command
+        id: kops-command
         with:
-          repository: '${{ secrets.AWS_KOPS_REPO }}'
-          token: '${{ secrets.GH_TOKEN }}'
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e21f7333e801ca751f058cc52de17f0ee6e1da6f
-        with:
-          role-to-assume: '${{ secrets.AWS_S3_ROLE }}'
-          aws-region: eu-west-1
-      - name: download kops
-        run: |
-          mkdir -p /tmp/bin
-          curl -Lo kops https://github.com/kubernetes/kops/releases/download/v1.21.0/kops-linux-amd64
-          chmod +x ./kops
-          sudo mv ./kops /tmp/bin/
-      - name: set env
-        run: |
-          export KOPS_STATE_STORE=s3://hkube-${CLUSTER_NAME}
-          echo KOPS_STATE_STORE=$KOPS_STATE_STORE >> $GITHUB_ENV
-          echo "/tmp/bin" >> $GITHUB_PATH
-      - name: test credentials
-        run: |
-          # test
-          aws s3 ls ${KOPS_STATE_STORE}
-      
-
-      # - name: set kubeconfig
-      #   run: ./spot/manage-spot.sh configure-cli ${CLUSTER_NAME} 2h
-      - name: run action
-        run: |
-          ./spot/manage-spot.sh ${ACTION} ${CLUSTER_NAME}
-                
+          CLUSTER_NAME: ${CLUSTER_NAME}
+          ACTION: ${ACTION}

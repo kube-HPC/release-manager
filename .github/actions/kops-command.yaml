@@ -1,0 +1,58 @@
+# This is a basic workflow to help you get started with Actions
+
+name: kops-command
+
+# Controls when the action will run.
+inputs:
+  CLUSTER_NAME:
+    description: name of the cluster to manage (test-spot, cicd, dev1)
+    required: true
+  ACTION:
+    description: action to perform (start-cluster, stop-cluster, master-node)
+    required: true
+
+runs:
+  using: "composite" # Mandatory parameter
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  env:
+    CLUSTER_NAME: '${{ inputs.CLUSTER_NAME }}'
+    ACTION: '${{ inputs.ACTION }}'
+jobs:
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          repository: '${{ secrets.AWS_KOPS_REPO }}'
+          token: '${{ secrets.GH_TOKEN }}'
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e21f7333e801ca751f058cc52de17f0ee6e1da6f
+        with:
+          role-to-assume: '${{ secrets.AWS_S3_ROLE }}'
+          aws-region: eu-west-1
+      - name: download kops
+        run: |
+          mkdir -p /tmp/bin
+          curl -Lo kops https://github.com/kubernetes/kops/releases/download/v1.21.0/kops-linux-amd64
+          chmod +x ./kops
+          sudo mv ./kops /tmp/bin/
+      - name: set env
+        run: |
+          export KOPS_STATE_STORE=s3://hkube-${CLUSTER_NAME}
+          echo KOPS_STATE_STORE=$KOPS_STATE_STORE >> $GITHUB_ENV
+          echo "/tmp/bin" >> $GITHUB_PATH
+      - name: test credentials
+        run: |
+          # test
+          aws s3 ls ${KOPS_STATE_STORE}
+      
+
+      # - name: set kubeconfig
+      #   run: ./spot/manage-spot.sh configure-cli ${CLUSTER_NAME} 2h
+      - name: run action
+        run: |
+          ./spot/manage-spot.sh ${ACTION} ${CLUSTER_NAME}
+                
