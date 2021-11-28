@@ -51,4 +51,9 @@ jobs:
         run: |
           # test
           aws s3 ls ${KOPS_STATE_STORE}
-      
+      # - name: set kubeconfig
+      #   run: ./spot/manage-spot.sh configure-cli ${CLUSTER_NAME} 2h
+      - name: run action
+        run: |
+          ./spot/manage-spot.sh ${ACTION} ${CLUSTER_NAME}
+                
