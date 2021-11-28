@@ -43,6 +43,10 @@ jobs:
         with:
           role-to-assume: '${{ secrets.AWS_S3_ROLE }}'
           aws-region: eu-west-1
+      - name: set env
+        run: |
+          export KOPS_STATE_STORE=s3://hkube-${CLUSTER_NAME}
+          echo KOPS_STATE_STORE=$KOPS_STATE_STORE >> $GITHUB_ENV
       - name: test credentials
         run: |
           # test
