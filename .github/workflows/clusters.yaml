@@ -36,3 +36,7 @@ jobs:
         with:
           CLUSTER_NAME: ${CLUSTER_NAME}
           ACTION: ${ACTION}
+          AWS_KOPS_REPO: ${{ secrets.AWS_KOPS_REPO }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          AWS_S3_ROLE: ${{ secrets.AWS_S3_ROLE }}
+
