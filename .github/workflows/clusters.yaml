@@ -44,7 +44,7 @@ jobs:
           role-to-assume: '${{ secrets.AWS_S3_ROLE }}'
           aws-region: eu-west-1
       - name: download kops
-        run |
+        run: |
           mkdir -p /tmp/bin
           curl -Lo kops https://github.com/kubernetes/kops/releases/download/v1.21.0/kops-linux-amd64
           chmod +x ./kops
