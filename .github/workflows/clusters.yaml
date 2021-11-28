@@ -1,0 +1,48 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI-CLUSTERS
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  workflow_dispatch:
+    inputs:
+      CLUSTER_NAME:
+        description: name of the cluster to manage (test-spot, cicd, dev1)
+        required: true
+      ACTION:
+        description: action to perform (start-cluster, stop-cluster, master-node)
+        required: true
+      
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+env:
+  CLUSTER_NAME: '${{ github.event.client_payload.CLUSTER_NAME || github.event.inputs.CLUSTER_NAME }}'
+  ACTION: '${{ github.event.client_payload.ACTION || github.event.inputs.ACTION }}'
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          repository: '${{ secrets.AWS_KOPS_REPO }}'
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@e21f7333e801ca751f058cc52de17f0ee6e1da6f
+        with:
+          role-to-assume: '${{ secrets.AWS_S3_ROLE }}'
+          aws-region: eu-west-1
+      - name: test credentials
+        run: |
+          # test
+          aws s3 ls s3://downloads.hkube.io
+      
