@@ -33,6 +33,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: '${{ secrets.AWS_KOPS_REPO }}'
+          token: '${{ secrets.GH_TOKEN }}'
       - uses: actions/setup-node@v1
         with:
           node-version: 14.x
