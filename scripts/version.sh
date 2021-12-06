@@ -2,7 +2,11 @@
 set -evo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-export BRANCH=${BRANCH:-master}
+if [[ $BRANCH = "main" ]]; then
+  echo changing $BRANCH to master
+  export BRANCH="master"
+fi
+
 echo cloning ${BRANCH} branch
 git clone --single-branch --branch ${BRANCH} https://github.com/kube-HPC/hkube.git /tmp/hkube
 cd /tmp/hkube
