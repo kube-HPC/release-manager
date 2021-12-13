@@ -9,6 +9,7 @@ fi
 
 echo cloning ${BRANCH} branch
 git clone --single-branch --branch ${BRANCH} https://github.com/kube-HPC/hkube.git /tmp/hkube
+pushd .
 cd /tmp/hkube
 npm i
 if [ -z $VERSION ]
@@ -16,6 +17,7 @@ then
   echo No Version. Defaulting to latest
   export VERSION=$(git describe --abbrev=0 --tags)  
 fi
+popd
 echo using version ${VERSION}
 VERSION2="${VERSION#[vV]}"
 VERSION_MAJOR="${VERSION2%%\.*}"
