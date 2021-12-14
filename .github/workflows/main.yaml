@@ -28,13 +28,16 @@ jobs:
         with:
           node-version: 14.x
       - run: npm ci
+      - name: env
+        run: |
+          echo BRANCH=${BRANCH:-master} >> $GITHUB_ENV
+        env:
+          BRANCH: '${{ github.event.client_payload.BRANCH || github.event.inputs.BRANCH }}'
       - run: |
           ./scripts/version.sh
           export TAG=$(jq -r .fullSystemVersion ./version.json)
-          echo BRANCH=${BRANCH:-master} >> $GITHUB_ENV
           echo TAG=$TAG >> $GITHUB_ENV
         env:
-          BRANCH: '${{ github.event.client_payload.BRANCH || github.event.inputs.BRANCH }}'
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
       - name: trigger
         id: trigger
