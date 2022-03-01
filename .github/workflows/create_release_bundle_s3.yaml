@@ -48,6 +48,8 @@ jobs:
         run: |
           # test
           aws s3 ls s3://downloads.hkube.io
+          df -h
+          df -h .
       - name: parse version
         run: |
           echo using version ${VERSION}
