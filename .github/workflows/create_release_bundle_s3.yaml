@@ -34,6 +34,13 @@ jobs:
       contents: read
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: cleanup
+        run: |
+          echo "Removing unwanted software... "
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          echo "... done"
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
