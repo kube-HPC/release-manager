@@ -17,6 +17,8 @@ const coreRepos = [
     'algorithm-gateway',
     'algorithm-operator',
     'algorithm-queue',
+    'algorithm-output',
+    'algorithm-hyperparams-tuner',
     'api-server',
     'caching-service',
     'datasources-service',
