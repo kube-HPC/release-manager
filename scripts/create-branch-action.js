@@ -165,7 +165,7 @@ const main = async () => {
                 await git.add('core/*/package-lock.json');
                 await git.add('core/*/package.json');
                 await git.commit('update versions', ['--no-verify'])
-                await syncSpawn('npm', ['version', VERSION_TYPE, '--git-tag-version', '--commit-hooks', 'false'], { cwd: repoFolder, stdio: 'inherit' })
+                await syncSpawn('npm', ['version', VERSION_TYPE, '--git-tag-version', '--commit-hooks', 'false', '-m', 'build all now!!!'], { cwd: repoFolder, stdio: 'inherit' })
             }
             else {
                 await syncSpawn('npm', ['version', VERSION_TYPE, '--commit-hooks', 'false'], { cwd: repoFolder, stdio: 'inherit' })
