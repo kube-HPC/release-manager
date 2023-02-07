@@ -47,7 +47,7 @@ jobs:
         with:
           node-version: 14.x
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e21f7333e801ca751f058cc52de17f0ee6e1da6f
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: '${{ secrets.AWS_S3_ROLE }}'
           aws-region: eu-west-1
