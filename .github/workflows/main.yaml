@@ -37,7 +37,7 @@ jobs:
           ./scripts/version.sh
           export TAG=$(jq -r .fullSystemVersion ./version.json)
           echo TAG=$TAG >> $GITHUB_ENV
-          cat ./version.json
+          cat ./scripts/version.json
         env:
           GH_TOKEN: '${{ secrets.GH_TOKEN }}'
       - name: trigger
