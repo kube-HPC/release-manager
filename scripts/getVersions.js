@@ -39,9 +39,10 @@ const paginationHelper = (github, method, options) => {
     return github.paginate(method.endpoint.merge(options))
 }
 
-const getRepoPackageNames = async (github,options) => {
+const getRepoPackageName = async (github,options) => {
     let jsonMetaData = {};
-    const contents = await github.repos.getContents(options);
+    let mergedOptions = {...options,path:"package.json"};
+    const contents = await github.repos.getContents(mergedOptions);
     if (contents) {
         const packageJsonContent = Buffer.from(contents.data.content, 'base64').toString();
         try {
@@ -81,7 +82,7 @@ const getRestVersions = async (github) => {
             return bToCompare - aToCompare;
         })
         //get package.json contents and use "name" field if it exists, instead of repository name.
-        const jsonMetaData = await getRepoPackageNames(github, { owner: HKUBE, repo: repo.name , path: "package.json"});
+        const jsonMetaData = await getRepoPackageName(github, { owner: HKUBE, repo: repo.name });
         const versionTag = tagNames[0];
         if (!versionTag) {
             console.error(`project ${repo.name} has no tags of version ${requiredVersion}`)
