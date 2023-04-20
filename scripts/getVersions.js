@@ -39,6 +39,25 @@ const paginationHelper = (github, method, options) => {
     return github.paginate(method.endpoint.merge(options))
 }
 
+const getRepoPackageName = async (github,options) => {
+    let jsonMetaData = {};
+    let mergedOptions = {...options,path:"package.json"};
+    const contents = await github.repos.getContents(mergedOptions);
+    if (contents) {
+        const packageJsonContent = Buffer.from(contents.data.content, 'base64').toString();
+        try {
+          const { name } = JSON.parse(packageJsonContent);
+          jsonMetaData = {
+            repoName: options.repo,
+            name: name || ''
+          };
+        } catch (error) {
+        console.error(`Error parsing package.json for repo ${options.repo}: ${error.message}`);
+        }
+    }
+    return jsonMetaData;
+}
+
 const getRestVersions = async (github) => {
     const reposRaw = await paginationHelper(github, github.repos.listForOrg, {
         org: 'Kube-HPC'
@@ -62,12 +81,18 @@ const getRestVersions = async (github) => {
             const bToCompare = parseFloat(b.name.replace(requiredVersion + '.', ''));
             return bToCompare - aToCompare;
         })
+        //get package.json contents and use "name" field if it exists, instead of repository name.
+        const jsonMetaData = await getRepoPackageName(github, { owner: HKUBE, repo: repo.name });
         const versionTag = tagNames[0];
         if (!versionTag) {
             console.error(`project ${repo.name} has no tags of version ${requiredVersion}`)
             return ({ project: repo.name, tag: 'none' });
         }
-        return ({ project: repo.name, tag: versionTag.name, sha: versionTag.sha });
+        let nameToReturn = repo.name;
+        if (jsonMetaData.name.length > 0){ //package.json "name" field should be the same as hkube/<nameFieldHere> in image name
+            nameToReturn = jsonMetaData.name;
+        }
+        return ({ project: nameToReturn, tag: versionTag.name, sha: versionTag.sha });
     }
 
     const coreReposTagPromises = coreRepos.map(getVersion);
