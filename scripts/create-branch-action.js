@@ -39,7 +39,11 @@ const deprecatedRepos = [
     'datasource-cleaner',
     'clean-old-jobs'
 
-]
+];
+
+const repoNameToPath = {
+    site: 'kube-HPC.github.io'
+};
 
 const main = async () => {
     if (!VERSION) {
@@ -87,6 +91,10 @@ const main = async () => {
     let errors = [];
     for (let v of repoVersions) {
         try {
+            if (repoNameToPath[v.project]) {
+                v.project = repoNameToPath[v.project];
+                console.log(`name ${v.project} converted to path => ${repoNameToPath[v.project]}`);
+            }
             console.log(`${v.project}: ${v.tag}`);
             const repoFolder = path.join(BASE_FOLDER, v.project);
             let git = simpleGit({ baseDir: BASE_FOLDER })
