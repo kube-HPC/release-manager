@@ -72,9 +72,9 @@ jobs:
         run: |
           if [ -z $DEV_VERSION ]
           then
-            wget https://hkube.io/helm/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
+            wget https://hkube.org/helm/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
           else
-            wget https://hkube.io/helm/dev/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
+            wget https://hkube.org/helm/dev/hkube-$VERSION.tgz && tar xfv hkube-$VERSION.tgz
           fi
       - name: create download script
         run: |
