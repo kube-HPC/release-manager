@@ -17,10 +17,10 @@ fi
 BASE_DIR=${BASE_DIR:-$HOME/install/dockers}
 if [ -z $DEV_VERSION ]; then
   HKUBE_CHART_REPO="hkube/hkube"
-  helm repo add hkube https://hkube.io/helm
+  helm repo add hkube https://hkube.org/helm
 else
   HKUBE_CHART_REPO="hkube-dev/hkube"
-  helm repo add hkube-dev https://hkube.io/helm/dev
+  helm repo add hkube-dev https://hkube.org/helm/dev
 fi
 helm repo update
 CHART_INFO=$(helm search repo hkube|grep "${HKUBE_CHART_REPO}")
