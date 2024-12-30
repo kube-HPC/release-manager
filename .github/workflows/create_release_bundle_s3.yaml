@@ -99,3 +99,6 @@ jobs:
             export TAR_FILE_NAME=hkube-diff-${PREV_VERSION}-${VERSION}.tgz
           fi
           aws s3 cp --acl public-read ${BASE_DIR}/hkube-${VERSION}/${TAR_FILE_NAME} s3://downloads.hkube.io/${VERSION}/
+          WEBSITE_URL="http://downloads.hkube.io.s3-website-eu-west-1.amazonaws.com/${VERSION}/${TAR_FILE_NAME}"
+          echo "Upload completed. The file is available at: $WEBSITE_URL"
+
