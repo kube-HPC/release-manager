@@ -40,10 +40,15 @@ const deprecatedRepos = [
     'clean-old-jobs'
 
 ];
-
+// Used to convert 'project' from versions.json file, to real repo path, when mismatching
 const repoNameToPath = {
     site: 'kube-HPC.github.io'
 };
+
+// For keys present in 'repoNameToPath', set key to be <[repoNameToPath.Key]:>, else, just a normal key <Key:>
+const repoBranchSelection = {
+    [repoNameToPath.site]: 'source' // The key was already modified to be repoNameToPath.site
+}
 
 const main = async () => {
     if (!VERSION) {
@@ -92,8 +97,8 @@ const main = async () => {
     for (let v of repoVersions) {
         try {
             if (repoNameToPath[v.project]) {
-                v.project = repoNameToPath[v.project];
                 console.log(`name ${v.project} converted to path => ${repoNameToPath[v.project]}`);
+                v.project = repoNameToPath[v.project];
             }
             console.log(`${v.project}: ${v.tag}`);
             const repoFolder = path.join(BASE_FOLDER, v.project);
@@ -124,11 +129,16 @@ const main = async () => {
             const git = simpleGit({ baseDir: repoFolder });
             const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
             console.log(`creating branch ${branchName} in ${v.project} from tag ${packageJson.version}`);
-
+            
             const a = await git.branch('-r')
-            const master = a.branches.master ? 'master' : 'main';
+            let master;
+            if (repoBranchSelection[v.project]) {
+                master = repoBranchSelection[v.project];
+            }
+            else {
+                master = a.branches.master ? 'master' : 'main';
+            }
             console.log(`master branch name is ${master}`)
-
             await git.checkoutLocalBranch(branchName)
             await git.push(['--set-upstream', 'origin', branchName])
             await git.checkout(`${master}`)
@@ -154,7 +164,13 @@ const main = async () => {
             const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
 
             const a = await git.branch('-r')
-            const master = a.branches.master ? 'master' : 'main';
+            let master;
+            if (repoBranchSelection[v.project]) {
+                master = repoBranchSelection[v.project];
+            }
+            else {
+                master = a.branches.master ? 'master' : 'main';
+            }
             console.log(`master branch name is ${master}`)
 
             console.log(`bumping ${VERSION_TYPE} version ${v.project}`);
