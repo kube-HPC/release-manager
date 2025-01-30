@@ -204,7 +204,6 @@ const main = async () => {
             console.log(`${v.project}: ${v.tag}`);
             const repoFolder = path.join(BASE_FOLDER, v.project);
             const git = simpleGit({ baseDir: repoFolder });
-            // const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
 
             const defaultBranch = await getDefaultBranch(git);
             console.log(`default branch name is ${defaultBranch}`);
