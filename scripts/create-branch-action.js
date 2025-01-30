@@ -10,7 +10,30 @@ const RELEASE_BRANCH = process.env.RELEASE_BRANCH;
 const GH_TOKEN = process.env.GH_TOKEN;
 const BASE_FOLDER = process.env.BASE_FOLDER;
 const VERSION_TYPE = process.env.VERSION_TYPE;
-const orgUrl = 'github.com/kube-HPC'
+const orgUrl = 'github.com/kube-HPC';
+
+/**
+ * Gets the default branch name from the remote repository (origin).
+ * It runs the `git remote show origin` command to fetch the default branch name.
+ * 
+ * @returns {Promise<string>} A promise that resolves with the default branch name (e.g., 'main' or 'develop').
+ *                           If no default branch is found, it will resolve with 'main'.
+ */
+const getDefaultBranch = (git) => {
+    return new Promise((resolve, reject) => {
+        git.raw(['remote', 'show', 'origin'], (err, data) => {
+        if (err) {
+            reject('Error executing git command');
+            return;
+        }
+
+        const match = data.match(/HEAD branch: (\S+)/);
+        const defaultBranch = match ? match[1] : 'main';
+        resolve(defaultBranch);
+        });
+    });
+}
+
 const coreRepos = [
     'algorithm-builder',
     'algorithm-debug',
@@ -125,9 +148,8 @@ const main = async () => {
             const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
             console.log(`creating branch ${branchName} in ${v.project} from tag ${packageJson.version}`);
 
-            const a = await git.branch('-r')
-            const master = a.branches.master ? 'master' : 'main';
-            console.log(`master branch name is ${master}`)
+            const defaultBranch = await getDefaultBranch(git);
+            console.log(`default branch name is ${defaultBranch}`);
 
             await git.checkoutLocalBranch(branchName)
             await git.push(['--set-upstream', 'origin', branchName])
@@ -153,9 +175,8 @@ const main = async () => {
             const git = simpleGit({ baseDir: repoFolder });
             const packageJson = JSON.parse(fs.readFileSync(path.join(repoFolder, './package.json')));
 
-            const a = await git.branch('-r')
-            const master = a.branches.master ? 'master' : 'main';
-            console.log(`master branch name is ${master}`)
+            const defaultBranch = await getDefaultBranch(git);
+            console.log(`default branch name is ${defaultBranch}`);
 
             console.log(`bumping ${VERSION_TYPE} version ${v.project}`);
             await git.checkout(`${master}`)
