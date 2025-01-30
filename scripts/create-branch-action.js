@@ -109,14 +109,16 @@ const main = async () => {
     const repoVersions = versions.versions.filter(v => !coreRepos.includes(v.project))
         .filter(v => !deprecatedRepos.includes(v.project))
         .concat(hkubeRepo, helmRepo);
-    const branchName = RELEASE_BRANCH
-    console.log(`Cloning all repos for version ${SYSTEM_VERSION}`)
+
+    const branchName = RELEASE_BRANCH;
+    console.log(`Cloning all repos for version ${SYSTEM_VERSION}\n`);
+
     let errors = [];
     for (let v of repoVersions) {
         try {
             if (repoNameToPath[v.project]) {
+                messages.push(`name ${v.project} converted to path => ${repoNameToPath[v.project]}`);
                 v.project = repoNameToPath[v.project];
-                console.log(`name ${v.project} converted to path => ${repoNameToPath[v.project]}`);
             }
             console.log(`${v.project}: ${v.tag}`);
             const repoFolder = path.join(BASE_FOLDER, v.project);
@@ -139,7 +141,16 @@ const main = async () => {
         console.error(`got errors in ${errors.length} repositories`);
         process.exit(-1)
     }
+
+    console.log('\nConversions done:');
+    messages.forEach(message => console.log(`- ${message}`));
+
+    console.log(`Successfully cloned all repositories`);
+    console.log('\n------------------------------------------------------------------------\n');
     errors = [];
+
+    console.log(`Creating a new release branch for each repository\n`);
+
     for (let v of repoVersions) {
         try {
             console.log(`${v.project}: ${v.tag}`);
@@ -167,7 +178,13 @@ const main = async () => {
         console.error(`got errors in ${errors.length} repositories`);
         process.exit(-1)
     }
+
+    console.log(`\nSuccessfully created a new release branch for each repository`);
+    console.log('\n------------------------------------------------------------------------\n');
     errors = [];
+
+    console.log(`Version bumping and tagging process starting\n`);
+
     for (let v of repoVersions) {
         try {
             console.log(`${v.project}: ${v.tag}`);
@@ -213,6 +230,8 @@ const main = async () => {
         console.error(`got errors in ${errors.length} repositories`);
         process.exit(-1)
     }
+
+    console.log(`Version bumping and tagging process completed successfully`);
 }
 
 main()
