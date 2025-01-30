@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const syncSpawn = require('spawn-sync');
 const simpleGit = require('simple-git');
-const { error } = require('console');
 
 const VERSION = process.env.VERSION;
 const SYSTEM_VERSION = process.env.SYSTEM_VERSION;
