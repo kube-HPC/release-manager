@@ -80,7 +80,7 @@ jobs:
         run: |
           curl -Lo image-export-import https://github.com/kube-HPC/image-exprort-import/releases/latest/download/image-export-import && chmod +x image-export-import
           ./image-export-import createScript --path /tmp/download-hkube.sh --chartPath ./hkube/ --options "global.sidecars.fluent_bit.enable=true,etcd.enable=true,jaeger.enable=true,nginx-ingress.enable=true,minio.enable=true,global.image_pull_secret.use_existing=false,global.clusterName=download,global.k8senv=kubernetes"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: download-hkube.sh
           path: /tmp/download-hkube.sh         
