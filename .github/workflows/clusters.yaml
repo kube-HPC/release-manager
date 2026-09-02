@@ -23,19 +23,20 @@ jobs:
   build:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, hkube-self-hosted]
+    timeout-minutes: 60
     permissions:
       id-token: write
       contents: read
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/kops-command
         id: kops-command
         with:
-          CLUSTER_NAME: ${CLUSTER_NAME}
-          ACTION: ${ACTION}
+          CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
+          ACTION: ${{ env.ACTION }}
           AWS_KOPS_REPO: ${{ secrets.AWS_KOPS_REPO }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           AWS_S3_ROLE: ${{ secrets.AWS_S3_ROLE }}

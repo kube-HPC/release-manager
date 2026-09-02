@@ -28,24 +28,18 @@ jobs:
   build:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, hkube-self-hosted]
+    timeout-minutes: 120
     permissions:
       id-token: write
       contents: read
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: cleanup
-        run: |
-          echo "Removing unwanted software... "
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          echo "... done"
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14.x
+          node-version: 18.x
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -54,7 +48,7 @@ jobs:
       - name: test credentials
         run: |
           # test
-          aws s3 ls s3://downloads.hkube.io
+          aws s3 ls s3://downloads.hkube.org
           df -h
           df -h .
       - name: parse version
@@ -98,7 +92,13 @@ jobs:
           else
             export TAR_FILE_NAME=hkube-diff-${PREV_VERSION}-${VERSION}.tgz
           fi
-          aws s3 cp --acl public-read ${BASE_DIR}/hkube-${VERSION}/${TAR_FILE_NAME} s3://downloads.hkube.io/${VERSION}/
-          WEBSITE_URL="http://downloads.hkube.io.s3-website-eu-west-1.amazonaws.com/${VERSION}/${TAR_FILE_NAME}"
+          aws s3 cp ${BASE_DIR}/hkube-${VERSION}/${TAR_FILE_NAME} s3://downloads.hkube.org/${VERSION}/
+          WEBSITE_URL="https://downloads.hkube.org/${VERSION}/${TAR_FILE_NAME}"
           echo "Upload completed. The file is available at: $WEBSITE_URL"
+      # persistent runner: the exported image tarballs are never reclaimed on their own
+      - name: cleanup
+        if: always()
+        run: |
+          rm -rf "${BASE_DIR}/hkube-${VERSION}"
+          docker image prune -af || true
 
