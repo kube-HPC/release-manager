@@ -25,7 +25,7 @@
     "lodash.pickby": "^4.6.0",
     "lodash.unionby": "^4.8.0",
     "request-promise-native": "^1.0.7",
-    "simple-git": "^2.38.0",
+    "simple-git": "^3.5.0",
     "spawn-sync": "^1.0.15"
   },
   "devDependencies": {
