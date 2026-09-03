@@ -16,8 +16,11 @@ inputs:
   GH_TOKEN:
     description: Github token to use
     required: true
-  AWS_S3_ROLE:
+  AWS_LZ_S3_ROLE:
     description: AWS S3 role to use
+    required: true
+  AWS_LZ_REGION:
+    description: AWS region to use
     required: true
 
 runs:
@@ -36,8 +39,8 @@ runs:
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@e21f7333e801ca751f058cc52de17f0ee6e1da6f
       with:
-        role-to-assume: '${{ inputs.AWS_S3_ROLE }}'
-        aws-region: eu-west-1
+        role-to-assume: '${{ inputs.AWS_LZ_S3_ROLE }}'
+        aws-region: '${{ inputs.AWS_LZ_REGION }}'
     - name: download kops
       shell: bash
       run: |
