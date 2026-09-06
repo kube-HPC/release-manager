@@ -23,14 +23,15 @@ jobs:
   build:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, hkube-self-hosted]
+    timeout-minutes: 120
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 14.x
+          node-version: 18.x
       - name: docker login
         run: |
             echo $OUT_REG_PASSWORD | docker login $OUT_REG_URL -u $OUT_REG_USERNAME --password-stdin
@@ -53,3 +54,12 @@ jobs:
           OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
           OUT_REG_USERNAME: '${{ secrets.OUT_REG_USERNAME }}'
           OUT_REG_PASSWORD: '${{ secrets.OUT_REG_PASSWORD }}'
+      # persistent runner: registry credentials and image tarballs are never reclaimed on their own
+      - name: cleanup
+        if: always()
+        run: |
+          docker logout $OUT_REG_URL || true
+          rm -rf "${BASE_DIR}/hkube-${VERSION}"
+          docker image prune -af || true
+        env:
+          OUT_REG_URL: '${{ secrets.OUT_REG_URL }}'
