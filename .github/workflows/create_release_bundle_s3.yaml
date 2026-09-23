@@ -22,7 +22,8 @@ env:
   VERSION: '${{ github.event.client_payload.VERSION || github.event.inputs.VERSION }}'
   PREV_VERSION: '${{ github.event.client_payload.PREV_VERSION || github.event.inputs.PREV_VERSION }}'
   DEV_VERSION: '${{ github.event.client_payload.DEV_VERSION || github.event.inputs.DEV_VERSION }}'
-  BASE_DIR: '/tmp/downloads'
+  # not /tmp: that is a ~2G tmpfs on the self-hosted runner, the image export needs tens of GB
+  BASE_DIR: '/var/tmp/hkube-downloads'
 jobs:
   # This workflow contains a single job called "build"
   build:

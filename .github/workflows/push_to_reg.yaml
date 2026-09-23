@@ -16,7 +16,8 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 env:
   VERSION: '${{ github.event.client_payload.VERSION || github.event.inputs.VERSION }}'
-  BASE_DIR: '/tmp/downloads'
+  # not /tmp: that is a ~2G tmpfs on the self-hosted runner, the image export needs tens of GB
+  BASE_DIR: '/var/tmp/hkube-downloads'
   DEV_VERSION: '${{ github.event.client_payload.DEV_VERSION || github.event.inputs.DEV_VERSION }}'
 jobs:
   # This workflow contains a single job called "build"
